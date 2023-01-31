@@ -1,5 +1,6 @@
 import { arrayBufferToBase64 } from '@/utils';
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next'
+import Link from 'next/link';
 import AlphaTab from "../components/index";
 
 export default function PracticePage({
@@ -7,7 +8,10 @@ export default function PracticePage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 
     return (
+        <>
+        <Link href={"/tabs"}>Tabs</Link>
         <AlphaTab b64={b64} />
+        </>
     )
 }
 

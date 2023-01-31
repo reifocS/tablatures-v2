@@ -36,7 +36,9 @@ export default function TabsPage({
             <Link
                 href={`/tabs/?artist=${artist ?? ""}&page=${isNaN(Number(page)) || Number(page) === 1 ? 1 : Number(page) - 1}`} >page précédente</Link>
 
-            <input placeholder='artist' onChange={debouncedSearch}></input>
+            <input placeholder='artist' 
+            defaultValue={artist}
+            onChange={debouncedSearch}></input>
             <ul>
                 {tabs.map((t, i) => <li
                 style={{

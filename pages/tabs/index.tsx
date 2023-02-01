@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from "react";
 
 import debounce from "lodash.debounce";
 import { fetchTrack } from "@/download";
+import { GuitarProTab, GuitarProTabOrg } from "@/utils";
 
 const SEARCH_PARAM = "search";
 const TYPE_PARAM = "queryType";
@@ -75,7 +76,7 @@ export default function TabsPage({
       </Link>
 
       <select
-        defaultValue={source ?? "0"}
+        defaultValue={source ?? GuitarProTab.source.toString()}
         onChange={(e) => {
           router.push({
             query: {
@@ -87,8 +88,10 @@ export default function TabsPage({
           });
         }}
       >
-        <option value="0">guitarprotab</option>
-        <option value="1">guitarprotabOrg</option>
+        <option value={GuitarProTab.source.toString()}>guitarprotab</option>
+        <option value={GuitarProTabOrg.source.toString()}>
+          guitarprotabOrg
+        </option>
       </select>
       <select
         defaultValue={queryType ?? "artist"}
@@ -149,7 +152,7 @@ export default function TabsPage({
             }}
             key={i}
           >
-            {t.group.title}-{t.track.title}
+            {t.group.title} - {t.track.title}
           </li>
         ))}
       </ul>

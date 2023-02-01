@@ -8,8 +8,6 @@ type Data = {
 };
 
 async function downloadGuitarProTabOrg(target: string) {
-  console.log("downloadGuitarProTabOrg");
-
   const data = await fetch(target);
   const html = await data.text();
   const document = new jsdom.JSDOM(html).window.document;

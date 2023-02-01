@@ -1,4 +1,4 @@
-import { arrayBufferToBase64 } from "@/utils";
+import { arrayBufferToBase64, GuitarProTabOrg } from "@/utils";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import AlphaTab from "../components/index";
@@ -15,10 +15,10 @@ export default function PracticePage({
 }
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const source = ctx.query.source || 0;
+  const source = ctx.query.source || "0";
   const referer = ctx.query.referer;
   let options: any = {};
-  if (source === "1") {
+  if (source === GuitarProTabOrg.source.toString()) {
     options.headers = {
       Referer: referer,
       Host: "guitarprotabs.org",

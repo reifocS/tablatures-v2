@@ -7,10 +7,15 @@ export default function PracticePage({
   b64,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
-    <>
-      <Link href={"/tabs"}>Tabs</Link>
+    <div className="container mx-auto p-10">
+      <Link
+        className="underline font-bold"
+        href={"/tabs"}
+      >
+        Tabs
+      </Link>
       <AlphaTab b64={b64} />
-    </>
+    </div>
   );
 }
 

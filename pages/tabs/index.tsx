@@ -70,7 +70,7 @@ export default function TabsPage({
         page précédente
       </Link>
       <select
-        defaultValue={queryType}
+        defaultValue={queryType ?? "artist"}
         onChange={(e) => {
           router.push({
             query: {
@@ -84,7 +84,7 @@ export default function TabsPage({
         <option value="song">song</option>
         <option value="artist">artist</option>
       </select>
-      {queryType === "artist" && (
+      {(!queryType || queryType === "artist") && (
         <input
           placeholder="artist"
           defaultValue={search}
@@ -134,13 +134,13 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     typeof queryType !== "string" ||
     (queryType !== "song" && queryType !== "artist")
   ) {
-    throw new Error(`invalid query type ${queryType}`);
+    queryType = "artist";
   }
   let query = ctx.query[SEARCH_PARAM];
   if (typeof query !== "string") {
-    throw new Error(`invalid type for query ${query}`);
+    query = "";
   }
-  const tabs = await fetchList(0, page, query, queryType);
+  const tabs = await fetchList(0, page, query, queryType as "artist" | "song");
   return {
     props: {
       tabs,

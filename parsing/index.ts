@@ -9,16 +9,28 @@ import jsdom from "jsdom";
  * @param {number} index index of the page to fetch
  * @param {string} query db index for storage
  */
-export async function fetchList(source: number, index: number, query: string) {
+export async function fetchList(
+  source: number,
+  index: number,
+  query: string,
+  searchType: "artist" | "song"
+) {
   switch (source) {
-    case 0:
-      return await fetchListGuitarProTabs(index, query);
+    case GuitarProTab.source:
+      return await fetchListGuitarProTabs(index, query, searchType);
     default:
       throw new Error(
         `Source '${source}' is not specified for the list scrapping.`
       );
   }
 }
+
+const GuitarProTab = {
+  source: 0,
+  artist: (query: string) => `https://www.guitarprotabs.net/artist/${query}`,
+  song: (query: string) =>
+    `https://www.guitarprotabs.net/q-${encodeURI(query)}`,
+};
 
 /**
  * Fetch the list of track for guitarprotabs
@@ -27,10 +39,12 @@ export async function fetchList(source: number, index: number, query: string) {
  * @param {string} query db index for storage
  * @param {object} database `{ [query]: { [index]: [tracks] } }`
  */
-async function fetchListGuitarProTabs(index: number, query: string) {
-  // Otherwise, we need to fetch it and parse it from remote
-  let source = `https://www.guitarprotabs.net/artist/`;
-  if (query) source = source.concat(`${query}`);
+async function fetchListGuitarProTabs(
+  index: number,
+  query: string,
+  searchType: "artist" | "song"
+) {
+  let source = GuitarProTab[searchType](query);
   if (index > 0) source = source.concat(`/${index}`);
   const data = await fetch(source);
   const content = await data.text();

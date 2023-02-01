@@ -51,10 +51,10 @@ export class Store<
     this.queue.push(() => {
       this.listeners.forEach((listener) => listener(this.state, previous))
     })
-    this.#flush()
+    this.flush()
   }
 
-  #flush = () => {
+  flush = () => {
     if (this.batching) return
     this.queue.forEach((cb) => cb())
     this.queue = []
@@ -64,6 +64,6 @@ export class Store<
     this.batching = true
     cb()
     this.batching = false
-    this.#flush()
+    this.flush()
   }
 }

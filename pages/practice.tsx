@@ -18,6 +18,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const source = ctx.query.source || "0";
   const referer = ctx.query.referer;
   let options: any = {};
+  // If the tab is on this domain, we need to add special headers
   if (source === GuitarProTabOrg.source.toString()) {
     options.headers = {
       Referer: referer,
@@ -33,6 +34,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const data = await fetch(ctx.query.downloadUrl as string, options);
   const arrayBuffer = await data.arrayBuffer();
 
+  //Serialize the tab to base64
   const b64 = arrayBufferToBase64(arrayBuffer);
 
   return {

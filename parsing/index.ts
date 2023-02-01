@@ -7,7 +7,7 @@ import jsdom from "jsdom";
  * @param {number} source database website
  * @param {number} pages number of pages to fetch
  * @param {number} index index of the page to fetch
- * @param {string} query db index for storage
+ * @param {string} query search
  */
 export async function fetchList(
   source: number,

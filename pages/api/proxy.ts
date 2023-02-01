@@ -7,6 +7,7 @@ type Data = {
   downloadUrl: string;
 };
 
+
 async function downloadGuitarProTabOrg(target: string) {
   const data = await fetch(target);
   const html = await data.text();
@@ -31,6 +32,11 @@ async function downloadGuitarPro(target: string) {
   return downloadUrl;
 }
 
+/**
+ * This is called from the client, we need to proxy the request to avoid CORS
+ * We get the href and the source to query from the url and return the download
+ * link to the client
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -50,6 +56,5 @@ export default async function handler(
     downloadUrl = await downloadGuitarPro(target);
   }
 
-  console.log({ downloadUrl });
   res.status(200).json({ downloadUrl });
 }

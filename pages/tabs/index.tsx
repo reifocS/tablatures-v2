@@ -147,7 +147,7 @@ export default function TabsPage({
                           },
                         });
                       }}
-                      className="px-4 cursor-pointer py-1 text-sm text-indigo-600 bg-indigo-200 rounded-full"
+                      className="px-4 cursor-pointer py-1 text-sm text-indigo-600 bg-indigo-200 hover:bg-indigo-400 hover:text-indigo-800 rounded-full"
                     >
                       Play
                     </div>

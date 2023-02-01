@@ -66,10 +66,8 @@ export default function TabsPage({
               });
             }}
           >
-            <option value={GuitarProTab.source.toString()}>guitarprotab</option>
-            <option value={GuitarProTabOrg.source.toString()}>
-              guitarprotabOrg
-            </option>
+            <option value={GuitarProTab.source.toString()}>source 1</option>
+            <option value={GuitarProTabOrg.source.toString()}>source 2</option>
           </select>
           <select
             defaultValue={queryType ?? "artist"}

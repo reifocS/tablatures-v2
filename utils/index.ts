@@ -34,3 +34,18 @@ export function base64ToArrayBuffer(base64: string) {
   }
   return bytes.buffer;
 }
+
+export const GuitarProTab = {
+  source: 0,
+  artist: (query: string) => `https://www.guitarprotabs.net/artist/${query}`,
+  song: (query: string) =>
+    `https://www.guitarprotabs.net/q-${encodeURI(query)}`,
+};
+
+export const GuitarProTabOrg = {
+  source: 1,
+  artist: (query: string) =>
+    `https://guitarprotabs.org/search.php?search=${query}&in=artists`,
+  song: (query: string) =>
+    `https://guitarprotabs.org/search.php?search=${query}&in=songs`,
+};

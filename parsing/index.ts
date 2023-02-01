@@ -1,5 +1,5 @@
 import { RootObject } from "@/types";
-import { extract } from "@/utils";
+import { extract, GuitarProTab, GuitarProTabOrg } from "@/utils";
 import jsdom from "jsdom";
 
 /**
@@ -18,6 +18,8 @@ export async function fetchList(
   switch (source) {
     case GuitarProTab.source:
       return await fetchListGuitarProTabs(index, query, searchType);
+    case GuitarProTabOrg.source:
+      return await fetchListGuitarProTabsOrg(index, query, searchType);
     default:
       throw new Error(
         `Source '${source}' is not specified for the list scrapping.`
@@ -25,20 +27,56 @@ export async function fetchList(
   }
 }
 
-const GuitarProTab = {
-  source: 0,
-  artist: (query: string) => `https://www.guitarprotabs.net/artist/${query}`,
-  song: (query: string) =>
-    `https://www.guitarprotabs.net/q-${encodeURI(query)}`,
-};
+async function fetchTracksGuitarProTabsOrg(source: string) {
+  const data = await fetch(source);
+  const html = await data.text();
+  const document = new jsdom.JSDOM(html).window.document;
+  const tables = document.getElementsByClassName("table-striped");
+  const table = tables[0] as HTMLTableElement;
+  if (!table) return [];
+  let tracks = Array.from(table.rows)
+    .slice(1, -1)
+    .map((r) => {
+      const cols = r.getElementsByTagName("td");
+      let s = cols[0];
+      let anchor = s.getElementsByTagName("a")[0];
+      let ar = cols[1];
+      let anchorA = ar.getElementsByTagName("a")[0];
+      return {
+        track: {
+          href: anchor?.href ?? null,
+          title: anchor?.title ?? null,
+        },
+        group: {
+          title: anchorA?.title ?? null,
+          href: anchorA?.href ?? null,
+        },
+      };
+    });
+  return tracks;
+}
 
-/**
- * Fetch the list of track for guitarprotabs
- * @param {number} pages number of pages to fetch
- * @param {number} index index of the current page
- * @param {string} query db index for storage
- * @param {object} database `{ [query]: { [index]: [tracks] } }`
- */
+async function fetchListGuitarProTabsOrg(
+  index: number,
+  query: string,
+  searchType: "artist" | "song"
+) {
+  if (!index) index = 1;
+  let source = GuitarProTabOrg[searchType](query);
+  source = source.concat(`&page=${index}`);
+  let tracks = await fetchTracksGuitarProTabsOrg(source);
+  if (searchType === "artist") {
+    if (!tracks[0]?.track?.href) {
+      // No artist found
+      return [];
+    }
+    const artist = tracks[0].track.href;
+    //Do another round
+    tracks = await fetchTracksGuitarProTabsOrg(artist);
+  }
+  return tracks;
+}
+
 async function fetchListGuitarProTabs(
   index: number,
   query: string,

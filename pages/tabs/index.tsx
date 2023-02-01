@@ -14,11 +14,12 @@ const TYPE_PARAM = "queryType";
 const PAGE_PARAM = "page";
 const SOURCE_PARAM = "source";
 
-function buildUrl(queryType = "artist", search = "", page = 1) {
+function buildUrl(queryType = "artist", search = "", page = 1, source = "0") {
   const data = {
     [TYPE_PARAM]: queryType,
     [SEARCH_PARAM]: search,
     [PAGE_PARAM]: page.toString(),
+    [SOURCE_PARAM]: source,
   };
 
   const searchParams = new URLSearchParams(data);
@@ -29,7 +30,7 @@ export default function TabsPage({
   tabs,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { page, queryType, search } = router.query;
+  const { page, queryType, search, source } = router.query;
 
   const handleSearchChange = useCallback(
     function (e: React.ChangeEvent<HTMLInputElement>, type: "artist" | "song") {
@@ -38,10 +39,11 @@ export default function TabsPage({
           [SEARCH_PARAM]: e.target.value,
           [TYPE_PARAM]: type,
           [PAGE_PARAM]: 1,
+          [SOURCE_PARAM]: source,
         },
       });
     },
-    [router]
+    [router, source]
   );
 
   const debouncedSearch = useMemo(() => {
@@ -54,7 +56,8 @@ export default function TabsPage({
         href={buildUrl(
           Array.isArray(queryType) ? queryType[0] : queryType,
           Array.isArray(search) ? search[0] : search,
-          isNaN(Number(page)) ? 2 : Number(page) + 1
+          isNaN(Number(page)) ? 2 : Number(page) + 1,
+          Array.isArray(source) ? source[0] : source
         )}
       >
         page suivante
@@ -64,11 +67,29 @@ export default function TabsPage({
         href={buildUrl(
           Array.isArray(queryType) ? queryType[0] : queryType,
           Array.isArray(search) ? search[0] : search,
-          isNaN(Number(page)) || Number(page) === 1 ? 1 : Number(page) - 1
+          isNaN(Number(page)) || Number(page) === 1 ? 1 : Number(page) - 1,
+          Array.isArray(source) ? source[0] : source
         )}
       >
         page précédente
       </Link>
+
+      <select
+        defaultValue={source ?? "0"}
+        onChange={(e) => {
+          router.push({
+            query: {
+              [PAGE_PARAM]: 1,
+              [SEARCH_PARAM]: search,
+              [TYPE_PARAM]: queryType,
+              [SOURCE_PARAM]: e.target.value,
+            },
+          });
+        }}
+      >
+        <option value="0">guitarprotab</option>
+        <option value="1">guitarprotabOrg</option>
+      </select>
       <select
         defaultValue={queryType ?? "artist"}
         onChange={(e) => {
@@ -77,6 +98,7 @@ export default function TabsPage({
               [PAGE_PARAM]: 1,
               [SEARCH_PARAM]: search,
               [TYPE_PARAM]: e.target.value,
+              [SOURCE_PARAM]: source,
             },
           });
         }}
@@ -109,11 +131,19 @@ export default function TabsPage({
               if (!t.track.href) {
                 return;
               }
-              const downloadUrl = await fetchTrack(0, t.track);
+              //TODO this indermediate step is annoying because
+              //it's done on client and we need to proxy the request
+              //we should find a better way
+              const downloadUrl = await fetchTrack(
+                isNaN(Number(source)) ? 0 : Number(source),
+                t.track
+              );
               router.push({
                 pathname: "/practice",
                 query: {
                   downloadUrl,
+                  source,
+                  referer: t.track.href,
                 },
               });
             }}
@@ -137,10 +167,27 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     queryType = "artist";
   }
   let query = ctx.query[SEARCH_PARAM];
+  let source = ctx.query[SOURCE_PARAM];
+
+  if (typeof source !== "string") {
+    source = "0";
+  }
   if (typeof query !== "string") {
     query = "";
   }
-  const tabs = await fetchList(0, page, query, queryType as "artist" | "song");
+  if (query.length < 2 && source === "1") {
+    return {
+      props: {
+        tabs: [],
+      },
+    };
+  }
+  const tabs = await fetchList(
+    Number(source),
+    page,
+    query,
+    queryType as "artist" | "song"
+  );
   return {
     props: {
       tabs,

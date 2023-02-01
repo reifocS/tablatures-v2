@@ -1,16 +1,26 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { extract } from "@/utils";
+import { extract, GuitarProTab, GuitarProTabOrg } from "@/utils";
 import type { NextApiRequest, NextApiResponse } from "next";
+import jsdom from "jsdom";
 
 type Data = {
   downloadUrl: string;
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  const target = req.query.href;
+async function downloadGuitarProTabOrg(target: string) {
+  console.log("downloadGuitarProTabOrg");
+
+  const data = await fetch(target);
+  const html = await data.text();
+  const document = new jsdom.JSDOM(html).window.document;
+  const downloadAnchor = document.getElementsByClassName(
+    "btn-info"
+  )[0] as HTMLAnchorElement;
+  const downloadUrl = downloadAnchor.href;
+  return downloadUrl;
+}
+
+async function downloadGuitarPro(target: string) {
   const data = await fetch(`https://www.guitarprotabs.net${target}`);
   const content = await data.text();
   // Extract the page download button link
@@ -20,14 +30,28 @@ export default async function handler(
     '" rel="nofollow">Download Tab</a>'
   );
   const downloadUrl = `https://www.guitarprotabs.net/${href}`;
-  /*
-    const dataDownload = await fetch(downloadUrl);
-    const download = await dataDownload.blob();
-    console.log(download.toString());
-  
-    const file = download;
-  
-  
-    return file;*/
+  return downloadUrl;
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
+) {
+  const target = req.query.href;
+  if (!target || typeof target !== "string") {
+    throw new Error("Target href is missing");
+  }
+  const source = req.query.source;
+  if (!source || typeof source !== "string") {
+    throw new Error("Source is missing");
+  }
+  let downloadUrl = "";
+  if (source.trim() == GuitarProTabOrg.source.toString()) {
+    downloadUrl = await downloadGuitarProTabOrg(target);
+  } else if (source.trim() == GuitarProTab.source.toString()) {
+    downloadUrl = await downloadGuitarPro(target);
+  }
+
+  console.log({ downloadUrl });
   res.status(200).json({ downloadUrl });
 }

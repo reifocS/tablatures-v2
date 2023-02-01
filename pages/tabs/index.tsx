@@ -1,5 +1,3 @@
-// You should use getServerSideProps when:
-// - Only if you need to pre-render a page whose data must be fetched at request time
 import { fetchList } from "../../parsing";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
@@ -107,55 +105,57 @@ export default function TabsPage({
           ></input>
         )}
         <div className="mt-2">
-          {tabs.length > 0 && <table className="">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="">Song</th>
-                <th className="">Artist</th>
-                <th className="">Play</th>
-              </tr>
-            </thead>
-            <tbody className="">
-              {tabs.map((t, i) => (
-                <tr key={i} className="">
-                  <td className="">{t.track.title?.replace(/by.*$/, "")}</td>
-                  <td className="">
-                    <div className="">
-                      {t.group.title ??
-                        t.track.title?.match(/by.*$/)?.at(0)?.substring(2)}
-                    </div>
-                  </td>
-                  <td className="">
-                    <div
-                      onClick={async () => {
-                        if (!t.track.href) {
-                          return;
-                        }
-                        //TODO this indermediate step is annoying because
-                        //it's done on client and we need to proxy the request
-                        //we should find a better way
-                        const downloadUrl = await fetchTrack(
-                          isNaN(Number(source)) ? 0 : Number(source),
-                          t.track
-                        );
-                        router.push({
-                          pathname: "/practice",
-                          query: {
-                            downloadUrl,
-                            source,
-                            referer: t.track.href,
-                          },
-                        });
-                      }}
-                      className="px-4 cursor-pointer py-1 text-sm text-indigo-600 bg-indigo-200 hover:bg-indigo-400 hover:text-indigo-800 rounded-full"
-                    >
-                      Play
-                    </div>
-                  </td>
+          {tabs.length > 0 && (
+            <table className="">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="">Song</th>
+                  <th className="">Artist</th>
+                  <th className="">Play</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>}
+              </thead>
+              <tbody className="">
+                {tabs.map((t, i) => (
+                  <tr key={i} className="">
+                    <td className="">{t.track.title?.replace(/by.*$/, "")}</td>
+                    <td className="">
+                      <div className="">
+                        {t.group.title ??
+                          t.track.title?.match(/by.*$/)?.at(0)?.substring(2)}
+                      </div>
+                    </td>
+                    <td className="">
+                      <div
+                        onClick={async () => {
+                          if (!t.track.href) {
+                            return;
+                          }
+                          //TODO this indermediate step is annoying because
+                          //it's done on client and we need to proxy the request
+                          //we should find a better way
+                          const downloadUrl = await fetchTrack(
+                            isNaN(Number(source)) ? 0 : Number(source),
+                            t.track
+                          );
+                          router.push({
+                            pathname: "/practice",
+                            query: {
+                              downloadUrl,
+                              source,
+                              referer: t.track.href,
+                            },
+                          });
+                        }}
+                        className="px-4 cursor-pointer py-1 text-sm text-indigo-600 bg-indigo-200 hover:bg-indigo-400 hover:text-indigo-800 rounded-full"
+                      >
+                        Play
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
           {tabs.length === 0 && <p>No tracks found</p>}
         </div>
       </div>

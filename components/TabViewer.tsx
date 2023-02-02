@@ -112,7 +112,7 @@ export default function App({
           Load
         </button>
       </form>
-      <div className="fixed z-50 flex w-full p-2 gap-1">
+      <div className="fixed z-50 top-[180px] left-[20px] flex w-full p-2 gap-1">
         <button
           onClick={() => {
             if (isPlaying) {

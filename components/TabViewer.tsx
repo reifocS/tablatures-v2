@@ -20,9 +20,12 @@ export default function App({
   const fileRef = useRef<any>(null);
   const [loaded, setLoaded] = useState(false);
 
+  const [isPlaying, setIsPlaying] = useState(false);
+
   async function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     setLoaded(false);
+    setIsPlaying(false);
     await new Promise<void>((resolve, reject) => {
       const reader: FileReader = new FileReader();
       reader.readAsArrayBuffer(fileRef.current.files[0]);
@@ -41,6 +44,7 @@ export default function App({
 
   useEffect(() => {
     if (!window.alphaTab) return;
+    setIsPlaying(false);
     apiRef.current = new window.alphaTab.AlphaTabApi(ref.current, {
       core: {
         tex: true,
@@ -84,7 +88,10 @@ export default function App({
 
   return (
     <div className="App">
-      <form className="flex items-baseline justify-center gap-2" onSubmit={handleSubmit}>
+      <form
+        className="flex flex-col flex-wrap items-center justify-center gap-2"
+        onSubmit={handleSubmit}
+      >
         <div className="relative mb-4">
           <label htmlFor="tab" className="leading-7 text-sm text-gray-600">
             Pick a tab:
@@ -99,7 +106,7 @@ export default function App({
           />
         </div>
         <button
-          className="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg"
+          className="inline-flex text-white bg-indigo-500 border-0 py-2 px-4 focus:outline-none hover:bg-indigo-600 rounded text-lg"
           type="submit"
         >
           Load
@@ -108,21 +115,18 @@ export default function App({
       <div className="fixed z-50 flex w-full p-2 gap-1">
         <button
           onClick={() => {
-            apiRef.current.play();
+            if (isPlaying) {
+              setIsPlaying(false);
+              apiRef.current.pause();
+            } else {
+              apiRef.current.play();
+              setIsPlaying(true);
+            }
           }}
           disabled={!loaded}
-          className="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg"
+          className="inline-flex text-white bg-blue-500 border-0 py-2 px-2 focus:outline-none hover:bg-blue-600 rounded-full text-lg"
         >
-          play{" "}
-        </button>
-        <button
-          className="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg"
-          onClick={() => {
-            apiRef.current.pause();
-          }}
-          disabled={!loaded}
-        >
-          pause
+          {isPlaying ? "⏸️" : "▶️"}
         </button>
       </div>
       <div ref={ref}></div>
